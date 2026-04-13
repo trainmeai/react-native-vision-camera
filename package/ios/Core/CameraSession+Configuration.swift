@@ -482,14 +482,20 @@ extension CameraSession {
    */
   func configureExposureLock(configuration: CameraConfiguration, device: AVCaptureDevice) {
     if configuration.exposureLocked {
+      // If user has explicit manual ISO/shutter set, don't overwrite their choice.
+      // The device is already in .custom mode, which IS effectively a hard lock.
+      if configuration.manualExposure != nil {
+        VisionLogger.log(level: .info, message: "AE lock requested but manual exposure already active — keeping .custom mode")
+        return
+      }
       guard device.isExposureModeSupported(.locked) else {
         VisionLogger.log(level: .warning, message: "Exposure lock not supported on this device")
         return
       }
       device.exposureMode = .locked
     } else {
-      // Only revert if we're not in custom manual mode — that path is owned by
-      // configureManualExposure.
+      // Only revert to auto if the user isn't in manual custom mode — that path
+      // is owned by configureManualExposure.
       if configuration.manualExposure == nil && device.isExposureModeSupported(.continuousAutoExposure) {
         device.exposureMode = .continuousAutoExposure
       }
@@ -501,6 +507,12 @@ extension CameraSession {
    */
   func configureFocusLock(configuration: CameraConfiguration, device: AVCaptureDevice) {
     if configuration.focusLocked {
+      // If user already has a manual focus lens position, keep it — that path
+      // already holds focus at the requested position via .locked mode.
+      if configuration.focusLensPosition != nil {
+        VisionLogger.log(level: .info, message: "AF lock requested but manual focus already active — keeping position")
+        return
+      }
       guard device.isFocusModeSupported(.locked) else {
         VisionLogger.log(level: .warning, message: "Focus lock not supported on this device")
         return
