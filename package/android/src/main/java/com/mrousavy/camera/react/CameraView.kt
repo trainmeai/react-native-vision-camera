@@ -7,6 +7,7 @@ import android.view.Gravity
 import android.view.ScaleGestureDetector
 import android.widget.FrameLayout
 import androidx.camera.view.PreviewView
+import com.facebook.react.bridge.ReadableMap
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.mrousavy.camera.core.CameraConfiguration
 import com.mrousavy.camera.core.CameraSession
@@ -87,6 +88,10 @@ class CameraView(context: Context) :
   var torch: Torch = Torch.OFF
   var zoom: Float = 1f // in "factor"
   var exposure: Double = 0.0
+  // OneShot manual controls (forked) — Android no-op stubs; iOS has full impl
+  var manualExposure: ReadableMap? = null
+  var whiteBalanceGains: ReadableMap? = null
+  var focusLensPosition: Double? = null
   var outputOrientation: OutputOrientation = OutputOrientation.DEVICE
   var androidPreviewViewType: PreviewViewType = PreviewViewType.SURFACE_VIEW
     set(value) {

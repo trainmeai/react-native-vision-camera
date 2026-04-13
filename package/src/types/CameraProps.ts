@@ -149,6 +149,39 @@ export interface CameraProps extends ViewProps {
    * The value between min- and max supported exposure is considered the default, neutral value.
    */
   exposure?: number
+  /**
+   * OneShot fork addition. Manual exposure (ISO + shutter duration) — AVFoundation
+   * pairs these atomically so they're configured together.
+   *
+   * - `iso`: ISO value, clamped to `device.activeFormat.minISO..maxISO`. Typical
+   *   iPhone 15 Pro range is 20–6528.
+   * - `duration`: shutter duration in SECONDS (e.g. `1/125 = 0.008`). Clamped
+   *   to `device.activeFormat.minExposureDuration..maxExposureDuration`.
+   *
+   * Pass `null`/`undefined` to revert to continuous auto exposure. Disables the
+   * `exposure` bias while active.
+   *
+   * @platform iOS
+   */
+  manualExposure?: { iso: number; duration: number } | null
+  /**
+   * OneShot fork addition. Manual white balance gains per channel. Each value
+   * is clamped to `[1.0, device.maxWhiteBalanceGain]` (typically up to 4.0 on
+   * modern iPhones). Pass `null`/`undefined` to revert to continuous auto.
+   *
+   * Use a Kelvin-to-gains helper in JS for temperature control UX.
+   *
+   * @platform iOS
+   */
+  whiteBalanceGains?: { red: number; green: number; blue: number } | null
+  /**
+   * OneShot fork addition. Manual focus lens position in `[0.0, 1.0]` where
+   * `0.0` = near focus and `1.0` = far focus. Pass `null`/`undefined` to revert
+   * to continuous auto focus.
+   *
+   * @platform iOS
+   */
+  focusLensPosition?: number | null
   //#endregion
 
   //#region Format/Preset selection

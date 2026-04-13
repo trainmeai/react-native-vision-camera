@@ -187,6 +187,17 @@ final class CameraSession: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
           if difference.exposureChanged {
             self.configureExposure(configuration: config, device: device)
           }
+          // 9a. OneShot manual controls (forked). Apply AFTER exposure bias so that
+          // manual ISO/shutter override the bias, and nil-revert to auto cleanly.
+          if difference.manualExposureChanged {
+            self.configureManualExposure(configuration: config, device: device)
+          }
+          if difference.whiteBalanceGainsChanged {
+            self.configureWhiteBalanceGains(configuration: config, device: device)
+          }
+          if difference.focusLensPositionChanged {
+            self.configureFocusLensPosition(configuration: config, device: device)
+          }
         }
 
         if difference.isSessionConfigurationDirty {

@@ -239,6 +239,25 @@ class CameraViewManager : ViewGroupManager<CameraView>() {
     view.exposure = exposure
   }
 
+  // OneShot manual controls (forked) — Android no-op stubs; iOS has full impl.
+  // These setters exist so ReactProp registration matches on both platforms;
+  // on Android they store the value without applying it, because CameraX's
+  // control model is different and implementation is deferred.
+  @ReactProp(name = "manualExposure")
+  fun setManualExposure(view: CameraView, manualExposure: ReadableMap?) {
+    view.manualExposure = manualExposure
+  }
+
+  @ReactProp(name = "whiteBalanceGains")
+  fun setWhiteBalanceGains(view: CameraView, whiteBalanceGains: ReadableMap?) {
+    view.whiteBalanceGains = whiteBalanceGains
+  }
+
+  @ReactProp(name = "focusLensPosition")
+  fun setFocusLensPosition(view: CameraView, focusLensPosition: Double) {
+    view.focusLensPosition = focusLensPosition
+  }
+
   @ReactProp(name = "outputOrientation")
   fun setOrientation(view: CameraView, outputOrientation: String?) {
     if (outputOrientation != null) {

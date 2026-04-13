@@ -61,6 +61,15 @@ public final class CameraView: UIView, CameraSessionDelegate, PreviewViewDelegat
   @objc var torch = "off"
   @objc var zoom: NSNumber = 1.0 // in "factor"
   @objc var exposure: NSNumber = 0.0
+  // OneShot manual controls (forked addition)
+  // ISO + exposureDuration are paired at the AVFoundation layer: setting one
+  // means setting the other, so consumers pass both as a single dictionary
+  // { iso: number; duration: number } or null for auto.
+  @objc var manualExposure: NSDictionary?
+  // White balance gains: { red, green, blue } each clamped to [1.0, device.maxWhiteBalanceGain]
+  @objc var whiteBalanceGains: NSDictionary?
+  // Manual focus lens position: 0.0 (near) ... 1.0 (far), or nil for auto
+  @objc var focusLensPosition: NSNumber?
   @objc var videoStabilizationMode: NSString?
   @objc var resizeMode: NSString = "cover" {
     didSet {
@@ -269,6 +278,24 @@ public final class CameraView: UIView, CameraSessionDelegate, PreviewViewDelegat
 
       // Exposure
       config.exposure = exposure.floatValue
+
+      // OneShot manual controls (forked)
+      if let me = manualExposure,
+         let iso = (me["iso"] as? NSNumber)?.floatValue,
+         let duration = (me["duration"] as? NSNumber)?.doubleValue {
+        config.manualExposure = CameraConfiguration.ManualExposure(iso: iso, durationSeconds: duration)
+      } else {
+        config.manualExposure = nil
+      }
+      if let wb = whiteBalanceGains,
+         let r = (wb["red"] as? NSNumber)?.floatValue,
+         let g = (wb["green"] as? NSNumber)?.floatValue,
+         let b = (wb["blue"] as? NSNumber)?.floatValue {
+        config.whiteBalanceGains = CameraConfiguration.WhiteBalanceGains(red: r, green: g, blue: b)
+      } else {
+        config.whiteBalanceGains = nil
+      }
+      config.focusLensPosition = focusLensPosition?.floatValue
 
       // isActive
       config.isActive = isActive

@@ -336,6 +336,82 @@ extension CameraSession {
     device.setExposureTargetBias(clamped)
   }
 
+  // pragma MARK: OneShot Manual Controls (forked)
+
+  /**
+   Applies manual ISO + shutter duration (AVFoundation pairs these atomically).
+   Passing nil reverts to .continuousAutoExposure.
+   */
+  func configureManualExposure(configuration: CameraConfiguration, device: AVCaptureDevice) {
+    if let manual = configuration.manualExposure {
+      guard device.isExposureModeSupported(.custom) else {
+        VisionLogger.log(level: .warning, message: "Manual exposure not supported on this device")
+        return
+      }
+      let fmt = device.activeFormat
+      let clampedISO = min(max(manual.iso, fmt.minISO), fmt.maxISO)
+      let requestedDuration = CMTimeMakeWithSeconds(manual.durationSeconds, preferredTimescale: 1_000_000_000)
+      let minDur = fmt.minExposureDuration
+      let maxDur = fmt.maxExposureDuration
+      let clampedDuration: CMTime
+      if CMTimeCompare(requestedDuration, minDur) < 0 {
+        clampedDuration = minDur
+      } else if CMTimeCompare(requestedDuration, maxDur) > 0 {
+        clampedDuration = maxDur
+      } else {
+        clampedDuration = requestedDuration
+      }
+      device.setExposureModeCustom(duration: clampedDuration, iso: clampedISO, completionHandler: nil)
+    } else {
+      if device.isExposureModeSupported(.continuousAutoExposure) {
+        device.exposureMode = .continuousAutoExposure
+      }
+    }
+  }
+
+  /**
+   Applies manual white balance gains (red/green/blue). Each value must be >= 1.0.
+   Passing nil reverts to .continuousAutoWhiteBalance.
+   */
+  func configureWhiteBalanceGains(configuration: CameraConfiguration, device: AVCaptureDevice) {
+    if let wb = configuration.whiteBalanceGains {
+      guard device.isWhiteBalanceModeSupported(.locked) else {
+        VisionLogger.log(level: .warning, message: "Manual white balance not supported on this device")
+        return
+      }
+      let maxGain = device.maxWhiteBalanceGain
+      let gains = AVCaptureDevice.WhiteBalanceGains(
+        redGain: min(max(wb.red, 1.0), maxGain),
+        greenGain: min(max(wb.green, 1.0), maxGain),
+        blueGain: min(max(wb.blue, 1.0), maxGain)
+      )
+      device.setWhiteBalanceModeLocked(with: gains, completionHandler: nil)
+    } else {
+      if device.isWhiteBalanceModeSupported(.continuousAutoWhiteBalance) {
+        device.whiteBalanceMode = .continuousAutoWhiteBalance
+      }
+    }
+  }
+
+  /**
+   Applies manual focus lens position in [0.0, 1.0]. 0.0 = near focus, 1.0 = far focus.
+   Passing nil reverts to .continuousAutoFocus.
+   */
+  func configureFocusLensPosition(configuration: CameraConfiguration, device: AVCaptureDevice) {
+    if let pos = configuration.focusLensPosition {
+      guard device.isFocusModeSupported(.locked) else {
+        VisionLogger.log(level: .warning, message: "Manual focus not supported on this device")
+        return
+      }
+      let clamped = min(max(pos, 0.0), 1.0)
+      device.setFocusModeLocked(lensPosition: clamped, completionHandler: nil)
+    } else {
+      if device.isFocusModeSupported(.continuousAutoFocus) {
+        device.focusMode = .continuousAutoFocus
+      }
+    }
+  }
+
   // pragma MARK: Audio
 
   /**

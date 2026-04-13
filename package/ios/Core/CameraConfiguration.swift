@@ -47,6 +47,22 @@ final class CameraConfiguration {
   // Exposure
   var exposure: Float?
 
+  // OneShot manual controls (forked)
+  struct ManualExposure: Equatable {
+    let iso: Float
+    let durationSeconds: Double
+  }
+
+  struct WhiteBalanceGains: Equatable {
+    let red: Float
+    let green: Float
+    let blue: Float
+  }
+
+  var manualExposure: ManualExposure?
+  var whiteBalanceGains: WhiteBalanceGains?
+  var focusLensPosition: Float?
+
   // isActive (Start/Stop)
   var isActive = false
 
@@ -71,6 +87,9 @@ final class CameraConfiguration {
       torch = other.torch
       zoom = other.zoom
       exposure = other.exposure
+      manualExposure = other.manualExposure
+      whiteBalanceGains = other.whiteBalanceGains
+      focusLensPosition = other.focusLensPosition
       isActive = other.isActive
       audio = other.audio
     } else {
@@ -98,6 +117,10 @@ final class CameraConfiguration {
     let torchChanged: Bool
     let zoomChanged: Bool
     let exposureChanged: Bool
+    // OneShot manual controls (forked)
+    let manualExposureChanged: Bool
+    let whiteBalanceGainsChanged: Bool
+    let focusLensPositionChanged: Bool
 
     let audioSessionChanged: Bool
     let locationChanged: Bool
@@ -116,6 +139,7 @@ final class CameraConfiguration {
      */
     var isDeviceConfigurationDirty: Bool {
       return isSessionConfigurationDirty || formatChanged || sidePropsChanged || zoomChanged || exposureChanged
+        || manualExposureChanged || whiteBalanceGainsChanged || focusLensPositionChanged
     }
 
     init(between left: CameraConfiguration?, and right: CameraConfiguration) {
@@ -139,6 +163,11 @@ final class CameraConfiguration {
       zoomChanged = formatChanged || left?.zoom != right.zoom
       // exposure (depends on device)
       exposureChanged = inputChanged || left?.exposure != right.exposure
+
+      // OneShot manual controls (forked) — all depend on device/format
+      manualExposureChanged = inputChanged || formatChanged || left?.manualExposure != right.manualExposure
+      whiteBalanceGainsChanged = inputChanged || left?.whiteBalanceGains != right.whiteBalanceGains
+      focusLensPositionChanged = inputChanged || left?.focusLensPosition != right.focusLensPosition
 
       // audio session
       audioSessionChanged = left?.audio != right.audio
