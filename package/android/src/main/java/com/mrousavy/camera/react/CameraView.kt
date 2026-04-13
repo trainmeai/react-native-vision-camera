@@ -93,6 +93,8 @@ class CameraView(context: Context) :
   var whiteBalanceGains: ReadableMap? = null
   var whiteBalanceTemperature: ReadableMap? = null
   var focusLensPosition: Double? = null
+  var exposureLocked: Boolean = false
+  var focusLocked: Boolean = false
   var outputOrientation: OutputOrientation = OutputOrientation.DEVICE
   var androidPreviewViewType: PreviewViewType = PreviewViewType.SURFACE_VIEW
     set(value) {

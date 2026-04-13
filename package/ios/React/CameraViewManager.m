@@ -58,6 +58,8 @@ RCT_EXPORT_VIEW_PROPERTY(manualExposure, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(whiteBalanceGains, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(whiteBalanceTemperature, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(focusLensPosition, NSNumber);
+RCT_EXPORT_VIEW_PROPERTY(exposureLocked, BOOL);
+RCT_EXPORT_VIEW_PROPERTY(focusLocked, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(enableZoomGesture, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(outputOrientation, NSString);
 RCT_EXPORT_VIEW_PROPERTY(resizeMode, NSString);

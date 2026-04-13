@@ -193,6 +193,21 @@ export interface CameraProps extends ViewProps {
    * @platform iOS
    */
   focusLensPosition?: number | null
+  /**
+   * OneShot fork addition. AE lock — freeze current exposure (whatever AE
+   * computed last) at the device level. Distinct from `manualExposure`, which
+   * lets the user dictate ISO + shutter. `exposureLocked` is set-and-forget;
+   * AVFoundation handles the freeze.
+   *
+   * Matches the native iOS Camera app's AE/AF lock behavior.
+   * @platform iOS
+   */
+  exposureLocked?: boolean
+  /**
+   * OneShot fork addition. AF lock — freeze current focus at the device level.
+   * @platform iOS
+   */
+  focusLocked?: boolean
   //#endregion
 
   //#region Format/Preset selection

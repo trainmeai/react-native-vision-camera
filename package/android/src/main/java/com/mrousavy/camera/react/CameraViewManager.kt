@@ -263,6 +263,16 @@ class CameraViewManager : ViewGroupManager<CameraView>() {
     view.focusLensPosition = focusLensPosition
   }
 
+  @ReactProp(name = "exposureLocked")
+  fun setExposureLocked(view: CameraView, exposureLocked: Boolean) {
+    view.exposureLocked = exposureLocked
+  }
+
+  @ReactProp(name = "focusLocked")
+  fun setFocusLocked(view: CameraView, focusLocked: Boolean) {
+    view.focusLocked = focusLocked
+  }
+
   @ReactProp(name = "outputOrientation")
   fun setOrientation(view: CameraView, outputOrientation: String?) {
     if (outputOrientation != null) {

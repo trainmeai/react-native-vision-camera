@@ -73,6 +73,9 @@ public final class CameraView: UIView, CameraSessionDelegate, PreviewViewDelegat
   @objc var whiteBalanceTemperature: NSDictionary?
   // Manual focus lens position: 0.0 (near) ... 1.0 (far), or nil for auto
   @objc var focusLensPosition: NSNumber?
+  // AE/AF lock — freeze current computed exposure/focus values
+  @objc var exposureLocked: Bool = false
+  @objc var focusLocked: Bool = false
   @objc var videoStabilizationMode: NSString?
   @objc var resizeMode: NSString = "cover" {
     didSet {
@@ -306,6 +309,8 @@ public final class CameraView: UIView, CameraSessionDelegate, PreviewViewDelegat
         config.whiteBalanceTemperature = nil
       }
       config.focusLensPosition = focusLensPosition?.floatValue
+      config.exposureLocked = exposureLocked
+      config.focusLocked = focusLocked
 
       // isActive
       config.isActive = isActive

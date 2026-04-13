@@ -475,6 +475,44 @@ extension CameraSession {
     }
   }
 
+  /**
+   AE lock: freeze exposure at whatever AE computed last. Distinct from manual
+   exposure — the user doesn't pick ISO/shutter, the camera does, then we lock
+   the result. Matches the native iOS Camera app's AE/AF lock behavior.
+   */
+  func configureExposureLock(configuration: CameraConfiguration, device: AVCaptureDevice) {
+    if configuration.exposureLocked {
+      guard device.isExposureModeSupported(.locked) else {
+        VisionLogger.log(level: .warning, message: "Exposure lock not supported on this device")
+        return
+      }
+      device.exposureMode = .locked
+    } else {
+      // Only revert if we're not in custom manual mode — that path is owned by
+      // configureManualExposure.
+      if configuration.manualExposure == nil && device.isExposureModeSupported(.continuousAutoExposure) {
+        device.exposureMode = .continuousAutoExposure
+      }
+    }
+  }
+
+  /**
+   AF lock: freeze focus at whatever AF computed last. See exposure-lock notes.
+   */
+  func configureFocusLock(configuration: CameraConfiguration, device: AVCaptureDevice) {
+    if configuration.focusLocked {
+      guard device.isFocusModeSupported(.locked) else {
+        VisionLogger.log(level: .warning, message: "Focus lock not supported on this device")
+        return
+      }
+      device.focusMode = .locked
+    } else {
+      if configuration.focusLensPosition == nil && device.isFocusModeSupported(.continuousAutoFocus) {
+        device.focusMode = .continuousAutoFocus
+      }
+    }
+  }
+
   // pragma MARK: Audio
 
   /**

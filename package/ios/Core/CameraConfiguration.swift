@@ -68,6 +68,9 @@ final class CameraConfiguration {
   var whiteBalanceGains: WhiteBalanceGains?
   var whiteBalanceTemperature: WhiteBalanceTemperature?
   var focusLensPosition: Float?
+  // AE/AF lock: "auto" = continuous (default), "locked" = freeze at current value
+  var exposureLocked: Bool = false
+  var focusLocked: Bool = false
 
   // isActive (Start/Stop)
   var isActive = false
@@ -97,6 +100,8 @@ final class CameraConfiguration {
       whiteBalanceGains = other.whiteBalanceGains
       whiteBalanceTemperature = other.whiteBalanceTemperature
       focusLensPosition = other.focusLensPosition
+      exposureLocked = other.exposureLocked
+      focusLocked = other.focusLocked
       isActive = other.isActive
       audio = other.audio
     } else {
@@ -129,6 +134,8 @@ final class CameraConfiguration {
     let whiteBalanceGainsChanged: Bool
     let whiteBalanceTemperatureChanged: Bool
     let focusLensPositionChanged: Bool
+    let exposureLockedChanged: Bool
+    let focusLockedChanged: Bool
 
     let audioSessionChanged: Bool
     let locationChanged: Bool
@@ -148,6 +155,7 @@ final class CameraConfiguration {
     var isDeviceConfigurationDirty: Bool {
       return isSessionConfigurationDirty || formatChanged || sidePropsChanged || zoomChanged || exposureChanged
         || manualExposureChanged || whiteBalanceGainsChanged || whiteBalanceTemperatureChanged || focusLensPositionChanged
+        || exposureLockedChanged || focusLockedChanged
     }
 
     init(between left: CameraConfiguration?, and right: CameraConfiguration) {
@@ -177,6 +185,8 @@ final class CameraConfiguration {
       whiteBalanceGainsChanged = inputChanged || left?.whiteBalanceGains != right.whiteBalanceGains
       whiteBalanceTemperatureChanged = inputChanged || left?.whiteBalanceTemperature != right.whiteBalanceTemperature
       focusLensPositionChanged = inputChanged || left?.focusLensPosition != right.focusLensPosition
+      exposureLockedChanged = inputChanged || left?.exposureLocked != right.exposureLocked
+      focusLockedChanged = inputChanged || left?.focusLocked != right.focusLocked
 
       // audio session
       audioSessionChanged = left?.audio != right.audio

@@ -201,6 +201,12 @@ final class CameraSession: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
           if difference.focusLensPositionChanged {
             self.configureFocusLensPosition(configuration: config, device: device)
           }
+          if difference.exposureLockedChanged {
+            self.configureExposureLock(configuration: config, device: device)
+          }
+          if difference.focusLockedChanged {
+            self.configureFocusLock(configuration: config, device: device)
+          }
         }
 
         if difference.isSessionConfigurationDirty {
