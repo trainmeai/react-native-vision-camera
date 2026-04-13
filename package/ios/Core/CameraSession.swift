@@ -195,6 +195,9 @@ final class CameraSession: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
           if difference.whiteBalanceGainsChanged {
             self.configureWhiteBalanceGains(configuration: config, device: device)
           }
+          if difference.whiteBalanceTemperatureChanged {
+            self.configureWhiteBalanceTemperature(configuration: config, device: device)
+          }
           if difference.focusLensPositionChanged {
             self.configureFocusLensPosition(configuration: config, device: device)
           }

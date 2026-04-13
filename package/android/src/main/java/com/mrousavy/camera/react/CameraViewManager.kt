@@ -253,6 +253,11 @@ class CameraViewManager : ViewGroupManager<CameraView>() {
     view.whiteBalanceGains = whiteBalanceGains
   }
 
+  @ReactProp(name = "whiteBalanceTemperature")
+  fun setWhiteBalanceTemperature(view: CameraView, whiteBalanceTemperature: ReadableMap?) {
+    view.whiteBalanceTemperature = whiteBalanceTemperature
+  }
+
   @ReactProp(name = "focusLensPosition")
   fun setFocusLensPosition(view: CameraView, focusLensPosition: Double) {
     view.focusLensPosition = focusLensPosition

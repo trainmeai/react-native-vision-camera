@@ -56,6 +56,7 @@ RCT_EXPORT_VIEW_PROPERTY(exposure, NSNumber);
 // OneShot manual controls (forked)
 RCT_EXPORT_VIEW_PROPERTY(manualExposure, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(whiteBalanceGains, NSDictionary);
+RCT_EXPORT_VIEW_PROPERTY(whiteBalanceTemperature, NSDictionary);
 RCT_EXPORT_VIEW_PROPERTY(focusLensPosition, NSNumber);
 RCT_EXPORT_VIEW_PROPERTY(enableZoomGesture, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(outputOrientation, NSString);

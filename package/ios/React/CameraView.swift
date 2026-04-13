@@ -68,6 +68,9 @@ public final class CameraView: UIView, CameraSessionDelegate, PreviewViewDelegat
   @objc var manualExposure: NSDictionary?
   // White balance gains: { red, green, blue } each clamped to [1.0, device.maxWhiteBalanceGain]
   @objc var whiteBalanceGains: NSDictionary?
+  // White balance as temperature + tint: { temperature, tint }. Safer than
+  // raw gains because AVFoundation does the conversion device-side.
+  @objc var whiteBalanceTemperature: NSDictionary?
   // Manual focus lens position: 0.0 (near) ... 1.0 (far), or nil for auto
   @objc var focusLensPosition: NSNumber?
   @objc var videoStabilizationMode: NSString?
@@ -294,6 +297,13 @@ public final class CameraView: UIView, CameraSessionDelegate, PreviewViewDelegat
         config.whiteBalanceGains = CameraConfiguration.WhiteBalanceGains(red: r, green: g, blue: b)
       } else {
         config.whiteBalanceGains = nil
+      }
+      if let wbt = whiteBalanceTemperature,
+         let k = (wbt["temperature"] as? NSNumber)?.floatValue {
+        let tint = (wbt["tint"] as? NSNumber)?.floatValue ?? 0
+        config.whiteBalanceTemperature = CameraConfiguration.WhiteBalanceTemperature(kelvin: k, tint: tint)
+      } else {
+        config.whiteBalanceTemperature = nil
       }
       config.focusLensPosition = focusLensPosition?.floatValue
 

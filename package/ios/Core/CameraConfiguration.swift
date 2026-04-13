@@ -59,8 +59,14 @@ final class CameraConfiguration {
     let blue: Float
   }
 
+  struct WhiteBalanceTemperature: Equatable {
+    let kelvin: Float
+    let tint: Float
+  }
+
   var manualExposure: ManualExposure?
   var whiteBalanceGains: WhiteBalanceGains?
+  var whiteBalanceTemperature: WhiteBalanceTemperature?
   var focusLensPosition: Float?
 
   // isActive (Start/Stop)
@@ -89,6 +95,7 @@ final class CameraConfiguration {
       exposure = other.exposure
       manualExposure = other.manualExposure
       whiteBalanceGains = other.whiteBalanceGains
+      whiteBalanceTemperature = other.whiteBalanceTemperature
       focusLensPosition = other.focusLensPosition
       isActive = other.isActive
       audio = other.audio
@@ -120,6 +127,7 @@ final class CameraConfiguration {
     // OneShot manual controls (forked)
     let manualExposureChanged: Bool
     let whiteBalanceGainsChanged: Bool
+    let whiteBalanceTemperatureChanged: Bool
     let focusLensPositionChanged: Bool
 
     let audioSessionChanged: Bool
@@ -139,7 +147,7 @@ final class CameraConfiguration {
      */
     var isDeviceConfigurationDirty: Bool {
       return isSessionConfigurationDirty || formatChanged || sidePropsChanged || zoomChanged || exposureChanged
-        || manualExposureChanged || whiteBalanceGainsChanged || focusLensPositionChanged
+        || manualExposureChanged || whiteBalanceGainsChanged || whiteBalanceTemperatureChanged || focusLensPositionChanged
     }
 
     init(between left: CameraConfiguration?, and right: CameraConfiguration) {
@@ -167,6 +175,7 @@ final class CameraConfiguration {
       // OneShot manual controls (forked) — all depend on device/format
       manualExposureChanged = inputChanged || formatChanged || left?.manualExposure != right.manualExposure
       whiteBalanceGainsChanged = inputChanged || left?.whiteBalanceGains != right.whiteBalanceGains
+      whiteBalanceTemperatureChanged = inputChanged || left?.whiteBalanceTemperature != right.whiteBalanceTemperature
       focusLensPositionChanged = inputChanged || left?.focusLensPosition != right.focusLensPosition
 
       // audio session

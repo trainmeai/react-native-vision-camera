@@ -348,6 +348,10 @@ extension CameraSession {
         VisionLogger.log(level: .warning, message: "Manual exposure not supported on this device")
         return
       }
+      guard manual.iso.isFinite, manual.durationSeconds.isFinite, manual.durationSeconds > 0 else {
+        VisionLogger.log(level: .warning, message: "manualExposure non-finite or non-positive — ignoring")
+        return
+      }
       let fmt = device.activeFormat
       let clampedISO = min(max(manual.iso, fmt.minISO), fmt.maxISO)
       let requestedDuration = CMTimeMakeWithSeconds(manual.durationSeconds, preferredTimescale: 1_000_000_000)
@@ -372,11 +376,20 @@ extension CameraSession {
   /**
    Applies manual white balance gains (red/green/blue). Each value must be >= 1.0.
    Passing nil reverts to .continuousAutoWhiteBalance.
+
+   Values are validated for NaN/Infinity before being passed to AVFoundation,
+   which otherwise would crash the process with an uncatchable NSException.
    */
   func configureWhiteBalanceGains(configuration: CameraConfiguration, device: AVCaptureDevice) {
     if let wb = configuration.whiteBalanceGains {
       guard device.isWhiteBalanceModeSupported(.locked) else {
         VisionLogger.log(level: .warning, message: "Manual white balance not supported on this device")
+        return
+      }
+      // Reject NaN / Infinity / sub-1.0 values outright. These would crash the
+      // AVCaptureSession with "Invalid parameter not satisfying: g.redGain >= 1.0".
+      guard wb.red.isFinite, wb.green.isFinite, wb.blue.isFinite else {
+        VisionLogger.log(level: .warning, message: "whiteBalanceGains contains non-finite values — ignoring")
         return
       }
       let maxGain = device.maxWhiteBalanceGain
@@ -394,13 +407,63 @@ extension CameraSession {
   }
 
   /**
+   Applies manual white balance as a color temperature (Kelvin) + tint. This is
+   the safe path — AVFoundation converts the temperature to gains that are
+   guaranteed valid for the current device, no JS-side math required.
+   Passing nil reverts to .continuousAutoWhiteBalance.
+   */
+  func configureWhiteBalanceTemperature(configuration: CameraConfiguration, device: AVCaptureDevice) {
+    if let wbt = configuration.whiteBalanceTemperature {
+      guard device.isWhiteBalanceModeSupported(.locked) else {
+        VisionLogger.log(level: .warning, message: "Manual white balance not supported on this device")
+        return
+      }
+      guard wbt.kelvin.isFinite, wbt.tint.isFinite else {
+        VisionLogger.log(level: .warning, message: "whiteBalanceTemperature contains non-finite values — ignoring")
+        return
+      }
+      // Clamp to a sane visible-light range. AVFoundation tolerates wider but
+      // produces weird output outside this range.
+      let temp = min(max(wbt.kelvin, 2000), 10000)
+      let tint = min(max(wbt.tint, -150), 150)
+      let tempAndTint = AVCaptureDevice.WhiteBalanceTemperatureAndTintValues(temperature: temp, tint: tint)
+      let rawGains = device.deviceWhiteBalanceGains(for: tempAndTint)
+      // AVFoundation's conversion can produce gains above maxWhiteBalanceGain at
+      // extreme temperatures — clamp again before locking.
+      let maxGain = device.maxWhiteBalanceGain
+      let gains = AVCaptureDevice.WhiteBalanceGains(
+        redGain: min(max(rawGains.redGain, 1.0), maxGain),
+        greenGain: min(max(rawGains.greenGain, 1.0), maxGain),
+        blueGain: min(max(rawGains.blueGain, 1.0), maxGain)
+      )
+      device.setWhiteBalanceModeLocked(with: gains, completionHandler: nil)
+    } else {
+      if device.isWhiteBalanceModeSupported(.continuousAutoWhiteBalance) {
+        device.whiteBalanceMode = .continuousAutoWhiteBalance
+      }
+    }
+  }
+
+  /**
    Applies manual focus lens position in [0.0, 1.0]. 0.0 = near focus, 1.0 = far focus.
    Passing nil reverts to .continuousAutoFocus.
    */
   func configureFocusLensPosition(configuration: CameraConfiguration, device: AVCaptureDevice) {
     if let pos = configuration.focusLensPosition {
+      // Two separate capability checks: locked mode + programmatic lens position.
+      // Some devices support one without the other. Without BOTH gates, calling
+      // setFocusModeLocked(lensPosition:) throws an uncatchable NSException and
+      // crashes the process.
       guard device.isFocusModeSupported(.locked) else {
-        VisionLogger.log(level: .warning, message: "Manual focus not supported on this device")
+        VisionLogger.log(level: .warning, message: "Manual focus (locked mode) not supported on this device")
+        return
+      }
+      guard device.isLockingFocusWithCustomLensPositionSupported else {
+        VisionLogger.log(level: .warning, message: "Programmatic lens position not supported on this device")
+        return
+      }
+      guard pos.isFinite else {
+        VisionLogger.log(level: .warning, message: "focusLensPosition non-finite — ignoring")
         return
       }
       let clamped = min(max(pos, 0.0), 1.0)

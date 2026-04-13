@@ -91,6 +91,7 @@ class CameraView(context: Context) :
   // OneShot manual controls (forked) — Android no-op stubs; iOS has full impl
   var manualExposure: ReadableMap? = null
   var whiteBalanceGains: ReadableMap? = null
+  var whiteBalanceTemperature: ReadableMap? = null
   var focusLensPosition: Double? = null
   var outputOrientation: OutputOrientation = OutputOrientation.DEVICE
   var androidPreviewViewType: PreviewViewType = PreviewViewType.SURFACE_VIEW

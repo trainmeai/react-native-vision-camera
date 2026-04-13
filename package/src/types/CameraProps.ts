@@ -175,6 +175,17 @@ export interface CameraProps extends ViewProps {
    */
   whiteBalanceGains?: { red: number; green: number; blue: number } | null
   /**
+   * OneShot fork addition. Manual white balance as color temperature + tint.
+   * SAFER than whiteBalanceGains — AVFoundation performs the temperature→gains
+   * conversion device-side, producing values always in valid range.
+   * - `temperature`: color temp in Kelvin (2000–10000, will be clamped)
+   * - `tint`: green/magenta shift (-150 to +150, typically 0 for neutral)
+   *
+   * Pass `null` to revert to continuous auto white balance.
+   * @platform iOS
+   */
+  whiteBalanceTemperature?: { temperature: number; tint: number } | null
+  /**
    * OneShot fork addition. Manual focus lens position in `[0.0, 1.0]` where
    * `0.0` = near focus and `1.0` = far focus. Pass `null`/`undefined` to revert
    * to continuous auto focus.
